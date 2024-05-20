@@ -1,0 +1,68 @@
+function fetchEditButtons() {
+  const editButtons = document.querySelectorAll(".xcrud-action");
+  return Array.from(editButtons).map((button) => button.href);
+}
+
+function containsDigit(str) {
+  for (let i = 0; i < str.length; i++) {
+    if (!isNaN(parseInt(str[i]))) {
+      return str[i];
+    }
+  }
+  return false;
+}
+
+async function submitFormData(url, formData) {
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      body: formData
+    });
+    if (response.ok) {
+      console.log("Form submitted successfully!");
+    } else {
+      console.error("Failed to submit form:", response.statusText);
+    }
+  } catch (error) {
+    console.error("Error submitting form:", error);
+  }
+}
+
+async function processURLs(urls) {
+  for (const url of urls) {
+    const response = await fetch(url);
+    const html = await response.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+
+    const itemDescriptionContainer = doc.querySelector("#item_description");
+    const itemDescription = itemDescriptionContainer.value;
+    // const lastCharacter = itemDescription[itemDescription.length - 1];
+    const lastCharacter = containsDigit(itemDescription);
+
+    if (lastCharacter) {
+      const classField = doc.querySelector("#class");
+      if (classField) {
+        classField.value = lastCharacter;
+        // itemDescriptionContainer.value = itemDescription.slice(0, -2);
+        doc.querySelector("#size-div input").disabled = true;
+        const formData = new FormData(doc.querySelector("form"));
+        const submitUrl = doc.querySelector("form").action;
+        await submitFormData(submitUrl, formData);
+      }
+    }
+  }
+}
+
+// const editButtonURLs = ['http://localhost:8000/akal_erp/public/feeadminpanel/editItem/10444']
+// const editButtonURLs = fetchEditButtons();
+processURLs(editButtonURLs);
+const editButtonURLs = [
+  "https://kalgidhartrust.info/akal_erp/public/feeadminpanel/editItem/10487",
+  "https://kalgidhartrust.info/akal_erp/public/feeadminpanel/editItem/10496",
+  "https://kalgidhartrust.info/akal_erp/public/feeadminpanel/editItem/10458",
+
+  "https://kalgidhartrust.info/akal_erp/public/feeadminpanel/editItem/10471",
+  "https://kalgidhartrust.info/akal_erp/public/feeadminpanel/editItem/10492",
+  "https://kalgidhartrust.info/akal_erp/public/feeadminpanel/editItem/10501",
+];
